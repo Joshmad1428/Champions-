@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Sorteo de Equipos — Prueba</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --green: #16a34a;
+      --green-light: #dcfce7;
+      --green-dark: #14532d;
+      --red: #dc2626;
+      --orange: #ea580c;
+      --orange-light: #fff7ed;
+      --orange-dark: #7c2d12;
+      --gray: #f4f4f5;
+      --gray2: #e4e4e7;
+      --gray3: #a1a1aa;
+      --text: #18181b;
+      --text2: #52525b;
+      --white: #ffffff;
+      --radius: 14px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #1c0a00;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 430px;
+      min-height: 100vh;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      background: #1c0a00;
+      padding: 28px 20px 24px;
+      text-align: center;
+    }
+    .header h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 38px;
+      letter-spacing: 2px;
+      color: #ffffff;
+      line-height: 1;
+    }
+    .test-badge {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: var(--orange);
+      color: #ffffff;
+    }
+
+    .body { padding: 24px 20px; flex: 1; }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .test-banner {
+      background: var(--orange-light);
+      border: 1.5px solid #fed7aa;
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: var(--orange-dark);
+      font-weight: 500;
+    }
+
+    .label {
+      font-size: 14px;
+      color: var(--text2);
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    .big-input {
+      width: 100%;
+      padding: 16px 18px;
+      font-size: 17px;
+      font-family: 'Inter', sans-serif;
+      border: 1.5px solid var(--gray2);
+      border-radius: var(--radius);
+      background: var(--white);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+    }
+    .big-input:focus { border-color: var(--orange); }
+
+    .err {
+      color: var(--red);
+      font-size: 13px;
+      margin: 6px 0 10px;
+      min-height: 18px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 17px;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: opacity 0.1s, transform 0.08s;
+      margin-top: 10px;
+      letter-spacing: 0.3px;
+    }
+    .btn:active { transform: scale(0.97); opacity: 0.88; }
+    .btn-primary { background: var(--orange); color: #ffffff; }
+    .btn-outline { background: transparent; color: var(--text); border: 1.5px solid var(--gray2); }
+    .btn-danger { background: transparent; color: var(--red); border: 1.5px solid #fca5a5; margin-top: 8px; }
+
+    .num-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .num-tile {
+      aspect-ratio: 1;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius);
+      border: 1.5px solid var(--gray2);
+      background: var(--white);
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.1s, transform 0.08s;
+      user-select: none;
+    }
+    .num-tile:active { transform: scale(0.92); background: var(--gray); }
+    .num-tile.taken {
+      background: var(--gray);
+      color: var(--gray3);
+      border-color: var(--gray2);
+      cursor: not-allowed;
+      pointer-events: none;
+      position: relative;
+    }
+    .num-tile.taken::after {
+      content: '';
+      position: absolute;
+      width: 60%;
+      height: 1.5px;
+      background: var(--gray3);
+      border-radius: 2px;
+      transform: rotate(-35deg);
+    }
+
+    .reveal-box {
+      background: var(--orange-light);
+      border-radius: var(--radius);
+      padding: 28px 20px;
+      text-align: center;
+      margin: 8px 0 20px;
+    }
+    .reveal-box .num-label {
+      font-size: 13px;
+      color: var(--orange-dark);
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+    .reveal-box .team-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 42px;
+      letter-spacing: 1.5px;
+      color: var(--orange-dark);
+      line-height: 1.1;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--gray2);
+      margin: 20px 0;
+    }
+
+    .list-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text2);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .list-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 14px;
+      background: var(--gray);
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+    .list-row .left { display: flex; align-items: center; gap: 10px; }
+    .list-row .pill {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: #1c0a00;
+      color: #ffffff;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .list-row .name { font-size: 15px; font-weight: 500; color: var(--text); }
+    .list-row .team { font-size: 13px; color: var(--text2); }
+
+    .slots-left {
+      font-size: 13px;
+      color: var(--text2);
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>Sorteo de Equipos</h1>
+    <span class="test-badge">Modo prueba</span>
+  </div>
+
+  <div class="body">
+
+    <div id="s-name" class="screen active">
+      <div class="test-banner">Versión de prueba — los datos no se guardan ni se pueden compartir.</div>
+      <p class="label">Escribe un nombre para probar</p>
+      <input class="big-input" id="inp-name" type="text" placeholder="Nombre de prueba" maxlength="40" autocomplete="off" autocorrect="off" />
+      <p id="err-name" class="err"></p>
+      <button class="btn btn-primary" onclick="goToPick()">Continuar →</button>
+    </div>
+
+    <div id="s-pick" class="screen">
+      <p class="label">Hola <strong id="lbl-name"></strong>, elige tu número:</p>
+      <p style="font-size:12px;color:var(--gray3);margin-top:2px;">Los números tachados ya fueron tomados.</p>
+      <div class="num-grid" id="num-grid"></div>
+    </div>
+
+    <div id="s-reveal" class="screen">
+      <div class="reveal-box">
+        <p class="num-label">Número <span id="r-num"></span> — tu equipo sería:</p>
+        <p class="team-name" id="r-team"></p>
+      </div>
+      <button class="btn btn-primary" onclick="goToName()">Siguiente prueba →</button>
+      <button class="btn btn-danger" onclick="resetAll()">Reiniciar todo</button>
+
+      <div class="divider"></div>
+      <p class="list-title">Lista de prueba</p>
+      <div id="list-rows-reveal"></div>
+    </div>
+
+    <div id="s-done" class="screen">
+      <div class="reveal-box" style="margin-bottom:20px;">
+        <p class="num-label" style="font-size:15px;">Prueba completa</p>
+        <p class="team-name" style="font-size:28px;">Todos los números usados</p>
+      </div>
+      <p class="list-title">Lista de prueba</p>
+      <p class="slots-left" id="lbl-slots"></p>
+      <div id="list-rows-final"></div>
+      <button class="btn btn-danger" style="margin-top:16px;" onclick="resetAll()">Reiniciar todo</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const TEAMS = {
+    1:"PSG", 2:"Liverpool", 3:"Real Madrid", 4:"Bayern München",
+    5:"FC Barcelona", 6:"Atlético de Madrid", 7:"Sporting CP", 8:"Arsenal"
+  };
+
+  let taken = new Set();
+  let participants = [];
+  let currentName = "";
+
+  function show(id) {
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+    window.scrollTo(0,0);
+  }
+
+  function buildGrid() {
+    const g = document.getElementById("num-grid");
+    g.innerHTML = "";
+    for (let i = 1; i <= 8; i++) {
+      const d = document.createElement("div");
+      d.className = "num-tile" + (taken.has(i) ? " taken" : "");
+      d.textContent = i;
+      if (!taken.has(i)) d.onclick = () => pick(i);
+      g.appendChild(d);
+    }
+  }
+
+  function goToPick() {
+    const v = document.getElementById("inp-name").value.trim();
+    const err = document.getElementById("err-name");
+    if (!v) { err.textContent = "Por favor escribe un nombre."; return; }
+    err.textContent = "";
+    currentName = v;
+    document.getElementById("lbl-name").textContent = v;
+    buildGrid();
+    show("s-pick");
+  }
+
+  function pick(num) {
+    taken.add(num);
+    participants.push({ name: currentName, num, team: TEAMS[num] });
+    document.getElementById("r-num").textContent = num;
+    document.getElementById("r-team").textContent = TEAMS[num];
+    renderRows("list-rows-reveal");
+    show("s-reveal");
+  }
+
+  function goToName() {
+    document.getElementById("inp-name").value = "";
+    document.getElementById("err-name").textContent = "";
+    if (taken.size >= 8) {
+      renderRows("list-rows-final");
+      const left = 8 - taken.size;
+      document.getElementById("lbl-slots").textContent = left > 0
+        ? `Quedan ${left} número(s) sin asignar.`
+        : "Todos los números han sido asignados.";
+      show("s-done");
+      return;
+    }
+    show("s-name");
+  }
+
+  function renderRows(containerId) {
+    const rows = document.getElementById(containerId);
+    rows.innerHTML = "";
+    participants.forEach(p => {
+      const d = document.createElement("div");
+      d.className = "list-row";
+      d.innerHTML = `<div class="left"><div class="pill">${p.num}</div><span class="name">${p.name}</span></div><span class="team">${p.team}</span>`;
+      rows.appendChild(d);
+    });
+  }
+
+  function resetAll() {
+    taken = new Set();
+    participants = [];
+    currentName = "";
+    document.getElementById("inp-name").value = "";
+    document.getElementById("err-name").textContent = "";
+    document.getElementById("list-rows-reveal").innerHTML = "";
+    document.getElementById("list-rows-final").innerHTML = "";
+    show("s-name");
+  }
+
+  document.getElementById("inp-name").addEventListener("keydown", e => {
+    if (e.key === "Enter") goToPick();
+  });
+</script>
+</body>
+</html>
